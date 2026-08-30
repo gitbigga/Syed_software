@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from "react";
 
 const services = [
   ["01", "Websites that do a job", "Fast, polished sites designed to turn local searches and referrals into real enquiries."],
@@ -21,21 +21,18 @@ const packages = [
     type: "DEFINED PROJECT RANGE",
     copy: "A focused business website with the scope agreed before development starts.",
     items: ["Defined page and feature scope", "Responsive build and launch", "Clear revision window"],
-    note: "Hosting, domains and paid third-party services are quoted separately where required.",
   },
   {
     name: "Automation 100",
     type: "SETUP + MONTHLY RANGE",
     copy: "A packaged automation for one clear workflow, with predictable included usage.",
     items: ["Workflow setup and testing", "Up to 100 automated SMS/call actions per month", "Basic launch support"],
-    note: "Included actions reset each monthly billing period and do not roll over. Extra usage is available in packaged add-on blocks.",
   },
   {
     name: "Custom Build",
     type: "SCOPED PROJECT RANGE",
     copy: "For portals, internal tools and software that needs a more tailored feature set.",
     items: ["Defined feature scope", "Build, testing and handover", "Direct developer access"],
-    note: "The final range depends on integrations, workflow complexity and the number of custom features required.",
   },
 ];
 
@@ -43,8 +40,29 @@ export default function Home() {
   const [processStarted, setProcessStarted] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const processRef = useRef<HTMLDivElement | null>(null);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
+
+  const previousStep = () => setActiveStep((current) => (current - 1 + steps.length) % steps.length);
+  const nextStep = () => setActiveStep((current) => (current + 1) % steps.length);
+
+  function beginSwipe(event: ReactPointerEvent<HTMLDivElement>) {
+    swipeStart.current = { x: event.clientX, y: event.clientY };
+  }
+
+  function endSwipe(event: ReactPointerEvent<HTMLDivElement>) {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    if (!start) return;
+
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) < 45 || Math.abs(dx) <= Math.abs(dy)) return;
+
+    if (dx < 0) nextStep();
+    else previousStep();
+  }
 
   useEffect(() => {
     const node = processRef.current;
@@ -129,14 +147,39 @@ export default function Home() {
           <div className="actions"><a className="primary" href="#quote">Request a quote <span>↗</span></a><a href="#services">See what we build ↓</a></div>
           <div className="trust"><span>Built locally</span><span>Clear fixed scopes</span><span>Direct developer access</span></div>
         </div>
-        <div className="board">
-          <div className="boardTop"><span>BUSINESS.OS</span><span>● LIVE</span></div>
-          <div className="card"><small>NEW LEAD</small><strong>Website enquiry</strong><i>Just now</i></div>
-          <div className="line">···</div>
-          <div className="card mid"><small>AUTOMATION</small><strong>Quote drafted</strong><i>Admin time saved</i></div>
-          <div className="line">···</div>
-          <div className="card end"><small>RESULT</small><strong>Job confirmed</strong><i>Customer notified</i></div>
-          <div className="boardFoot"><small>ONE CONNECTED SYSTEM</small><strong>Less admin.<br />More business.</strong><b><i /><i /></b></div>
+
+        <div className="heroProcess" id="process">
+          <div className="intro heroProcessIntro"><small>HOW IT WORKS</small><h2>From problem to <em>working product.</em></h2></div>
+          <div
+            className={`processCarousel ${processStarted ? "isStarted" : ""}`}
+            ref={processRef}
+            aria-roledescription="carousel"
+            aria-label="Syed Software process"
+            onPointerDown={beginSwipe}
+            onPointerUp={endSwipe}
+            onPointerCancel={() => { swipeStart.current = null; }}
+          >
+            <div className="processMeta"><span>PROCESS</span><b>0{activeStep + 1} / 04</b></div>
+            <div className="processViewport">
+              <div className="processTrack" style={{ transform: `translateX(-${activeStep * 100}%)` }}>
+                {steps.map(([title, copy], index) => (
+                  <article className="processSlide" key={title} aria-hidden={activeStep !== index}>
+                    <span>0{index + 1}</span>
+                    <div><h3>{title}</h3><p>{copy}</p></div>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className="processNavigation" aria-label="Process navigation">
+              <button className="processArrow" type="button" onClick={previousStep} aria-label="Previous process step">◀</button>
+              <div className="processControls" aria-label="Process slides">
+                {steps.map(([title], index) => (
+                  <button key={title} type="button" className={activeStep === index ? "active" : ""} onClick={() => setActiveStep(index)} aria-label={`Show ${title} step`}><span /></button>
+                ))}
+              </div>
+              <button className="processArrow" type="button" onClick={nextStep} aria-label="Next process step">▶</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -153,7 +196,7 @@ export default function Home() {
       </section>
 
       <section className="packages section" id="packages">
-        <div className="intro packageIntro"><small>PACKAGED OFFERS</small><h2>Clear scope.<br /><em>Flexible range.</em></h2><p>Packages make the conditions predictable without pretending every business needs the exact same build. Final pricing is confirmed inside a quoted range before work begins.</p></div>
+        <div className="intro packageIntro"><h2>Simple packages.<br /><em>Clear expectations.</em></h2><p>Final pricing is confirmed before work begins.</p></div>
         <div className="packageGrid">
           {packages.map((item, index) => (
             <article key={item.name}>
@@ -161,7 +204,6 @@ export default function Home() {
               <h3>{item.name}</h3>
               <p>{item.copy}</p>
               <ul>{item.items.map((point) => <li key={point}>{point}</li>)}</ul>
-              <div className="packageCondition"><b>Conditions</b><p>{item.note}</p></div>
             </article>
           ))}
         </div>
@@ -170,28 +212,6 @@ export default function Home() {
       <section className="statement">
         <div><small>BUILT FOR THE REAL WORLD</small><h2>Software should fit your business.<br /><em>Not the other way around.</em></h2></div>
         <p>You know your business. We know how to turn the frustrating, manual parts into something faster, simpler and easier to grow.</p>
-      </section>
-
-      <section className="section process" id="process">
-        <div className="intro"><small>HOW IT WORKS</small><h2>From problem to <em>working product.</em></h2></div>
-        <div className={`processCarousel ${processStarted ? "isStarted" : ""}`} ref={processRef} aria-roledescription="carousel" aria-label="Syed Software process">
-          <div className="processMeta"><span>PROCESS</span><b>0{activeStep + 1} / 04</b></div>
-          <div className="processViewport">
-            <div className="processTrack" style={{ transform: `translateX(-${activeStep * 100}%)` }}>
-              {steps.map(([title, copy], index) => (
-                <article className="processSlide" key={title} aria-hidden={activeStep !== index}>
-                  <span>0{index + 1}</span>
-                  <div><h3>{title}</h3><p>{copy}</p></div>
-                </article>
-              ))}
-            </div>
-          </div>
-          <div className="processControls" aria-label="Process slides">
-            {steps.map(([title], index) => (
-              <button key={title} type="button" className={activeStep === index ? "active" : ""} onClick={() => setActiveStep(index)} aria-label={`Show ${title} step`}><span /></button>
-            ))}
-          </div>
-        </div>
       </section>
 
       <section className="quote" id="quote">
