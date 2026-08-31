@@ -3,49 +3,98 @@
 import { FormEvent, PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from "react";
 
 const services = [
-  ["01", "Websites that do a job", "Fast, polished sites designed to turn local searches and referrals into real enquiries."],
-  ["02", "Business automation", "Remove repetitive admin with practical workflows tailored to the way your team already works."],
-  ["03", "Custom software", "Quoting tools, client portals, booking systems and internal apps built around your business."],
+  {
+    number: "01",
+    title: "Bring in more enquiries",
+    copy: "A sharper website that makes it easier for local customers to understand what you do and take the next step.",
+    href: "#package-website",
+    cta: "See website package",
+  },
+  {
+    number: "02",
+    title: "Follow up leads automatically",
+    copy: "Turn missed calls, enquiries and repetitive follow-up into a simple automated workflow.",
+    href: "/demo/gentle-dental-care",
+    cta: "See a live concept",
+  },
+  {
+    number: "03",
+    title: "Cut repetitive admin",
+    copy: "Replace manual quoting, booking, data entry or handoffs with a tool built around the way your business works.",
+    href: "#package-custom",
+    cta: "See custom build",
+  },
 ];
 
 const steps = [
-  ["Discover", "We map the bottleneck and what success looks like."],
-  ["Design", "You see the direction early, before the full build."],
-  ["Build", "Your software is developed, tested and refined."],
-  ["Launch", "We put it live and stay available after handover."],
+  ["Discover", "We identify the bottleneck, the cost of leaving it alone and what a better outcome should look like."],
+  ["Design", "You see the direction early, before the full build starts."],
+  ["Build", "Your website, automation or software is developed, tested and refined."],
+  ["Launch", "We put it live, hand it over clearly and stay available for the agreed launch support."],
+];
+
+const problems = [
+  ["Missed enquiries", "Customers call or message, but busy staff cannot always respond while the opportunity is still warm."],
+  ["Too much repetitive admin", "Time disappears into copying information, sending the same messages and updating systems by hand."],
+  ["An outdated website", "The business looks better in real life than it does online, costing trust before a customer even calls."],
+  ["Software that does not fit", "Generic platforms force the team into somebody else’s workflow instead of supporting the one that already works."],
 ];
 
 const packages = [
   {
-    name: "Website Launch",
-    type: "DEFINED PROJECT RANGE",
-    copy: "A focused business website with the scope agreed before development starts.",
+    id: "package-website",
+    name: "Business Website",
+    outcome: "Turn searches and referrals into more enquiries.",
+    type: "ONE-OFF PROJECT",
+    price: "AUD $1,500–$4,000",
+    copy: "For local businesses that need a fast, credible website designed around one clear conversion goal.",
     items: ["Defined page and feature scope", "Responsive build and launch", "Clear revision window"],
   },
   {
-    name: "Automation 100",
-    type: "SETUP + MONTHLY RANGE",
-    copy: "A packaged automation for one clear workflow, with predictable included usage.",
-    items: ["Workflow setup and testing", "Up to 100 automated SMS/call actions per month", "Basic launch support"],
+    id: "package-followup",
+    name: "Lead Follow-Up System",
+    outcome: "Respond faster without adding more admin.",
+    type: "SETUP + MONTHLY",
+    price: "AUD $1,000–$3,000 setup",
+    subprice: "Typical ongoing range: $150–$500 / month",
+    copy: "For one clear workflow such as missed-call SMS follow-up, lead nurturing or appointment reminders.",
+    items: ["Workflow setup and testing", "Usage allowance defined in your quote", "Add-on usage available in fixed blocks"],
   },
   {
-    name: "Custom Build",
-    type: "SCOPED PROJECT RANGE",
-    copy: "For portals, internal tools and software that needs a more tailored feature set.",
+    id: "package-custom",
+    name: "Business Workflow System",
+    outcome: "Replace repetitive work with a system built around your team.",
+    type: "SCOPED PROJECT",
+    price: "AUD $3,000–$10,000+",
+    copy: "For portals, quoting tools, internal apps and workflows that need a more tailored feature set.",
     items: ["Defined feature scope", "Build, testing and handover", "Direct developer access"],
   },
+];
+
+const faqs = [
+  ["How much does a project cost?", "The package ranges above are indicative. Final pricing is confirmed before work begins, after the exact scope and integrations are clear."],
+  ["Do I need to know what software I need?", "No. Start with the problem. Tell us what is taking too long, getting missed or costing opportunities, and we can recommend the simplest useful approach."],
+  ["Do I need to replace the tools I already use?", "Not necessarily. Where practical, the solution can be designed around tools your business already uses rather than forcing a full replacement."],
+  ["What happens after I enquire?", "We review the problem, clarify anything important and send back a recommended approach with an indicative scope. Nothing starts until you approve the final scope and price."],
+  ["What happens after launch?", "Every project includes an agreed handover and launch-support window. Ongoing support can be scoped separately when it is useful."],
 ];
 
 export default function Home() {
   const [processStarted, setProcessStarted] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [processReset, setProcessReset] = useState(0);
   const processRef = useRef<HTMLDivElement | null>(null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
 
-  const previousStep = () => setActiveStep((current) => (current - 1 + steps.length) % steps.length);
-  const nextStep = () => setActiveStep((current) => (current + 1) % steps.length);
+  const setStepManually = (index: number) => {
+    setActiveStep((index + steps.length) % steps.length);
+    setProcessReset((value) => value + 1);
+  };
+
+  const previousStep = () => setStepManually(activeStep - 1);
+  const nextStep = () => setStepManually(activeStep + 1);
 
   function beginSwipe(event: ReactPointerEvent<HTMLDivElement>) {
     swipeStart.current = { x: event.clientX, y: event.clientY };
@@ -92,12 +141,12 @@ export default function Home() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reducedMotion) return;
 
-    const timer = window.setInterval(() => {
+    const timer = window.setTimeout(() => {
       setActiveStep((current) => (current + 1) % steps.length);
     }, 2800);
 
-    return () => window.clearInterval(timer);
-  }, [processStarted]);
+    return () => window.clearTimeout(timer);
+  }, [processStarted, activeStep, processReset]);
 
   async function quote(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -113,10 +162,10 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.get("name"),
-          business: data.get("business"),
           email: data.get("email"),
-          project: data.get("project"),
           details: data.get("details"),
+          business: "",
+          project: "Not sure yet",
         }),
       });
 
@@ -136,16 +185,16 @@ export default function Home() {
     <main>
       <header>
         <a className="brand" href="#top"><b><i /><i /><i /></b><span>SYED<small>SOFTWARE</small></span></a>
-        <nav><a href="#services">Services</a><a href="#process">Process</a><a className="navCta" href="#quote">Request a quote ↗</a></nav>
+        <a className="navCta" href="#quote">Get a scope &amp; price ↗</a>
       </header>
 
       <section className="hero" id="top">
-        <div>
-          <p className="eyebrow"><i /> SOFTWARE FOR LOCAL BUSINESS</p>
-          <h1>Your business has a <em>better way</em> to work.</h1>
-          <p className="lead">Syed Software builds websites, automations and custom tools that save local businesses time—and help them win more customers.</p>
-          <div className="actions"><a className="primary" href="#quote">Request a quote <span>↗</span></a><a href="#services">See what we build ↓</a></div>
-          <div className="trust"><span>Built locally</span><span>Clear fixed scopes</span><span>Direct developer access</span></div>
+        <div className="heroCopy">
+          <h1>More sales.<br /><em>Less admin.</em><br />More time back.</h1>
+          <p className="lead">Websites and automations designed to help local businesses bring in more enquiries, follow them up faster and cut repetitive work.</p>
+          <div className="actions"><a className="primary" href="#quote">Get a scope &amp; price <span>↗</span></a><a href="#problems">See what we solve ↓</a></div>
+          <p className="microcopy">No obligation. You’ll know what is involved before work begins.</p>
+          <div className="trust"><span>Built locally</span><span>Clear scope before build</span><span>Direct developer access</span></div>
         </div>
 
         <div className="heroProcess" id="process">
@@ -172,9 +221,9 @@ export default function Home() {
             </div>
             <div className="processNavigation" aria-label="Process navigation">
               <button className="processArrow" type="button" onClick={previousStep} aria-label="Previous process step">◀</button>
-              <div className="processControls" aria-label="Process slides">
+              <div className="processControls" key={`${activeStep}-${processReset}`} aria-label="Process slides">
                 {steps.map(([title], index) => (
-                  <button key={title} type="button" className={activeStep === index ? "active" : ""} onClick={() => setActiveStep(index)} aria-label={`Show ${title} step`}><span /></button>
+                  <button key={title} type="button" className={activeStep === index ? "active" : ""} onClick={() => setStepManually(index)} aria-label={`Show ${title} step`}><span /></button>
                 ))}
               </div>
               <button className="processArrow" type="button" onClick={nextStep} aria-label="Next process step">▶</button>
@@ -183,45 +232,101 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="ticker" aria-label="Services ticker">
+      <div className="ticker" aria-label="Benefits ticker">
         <div className="tickerTrack">
-          <span>WEBSITES ✦ AUTOMATION ✦ CUSTOM SOFTWARE ✦ CLIENT PORTALS ✦ BOOKING SYSTEMS ✦</span>
-          <span aria-hidden="true">WEBSITES ✦ AUTOMATION ✦ CUSTOM SOFTWARE ✦ CLIENT PORTALS ✦ BOOKING SYSTEMS ✦</span>
+          <span>MORE ENQUIRIES ✦ LESS ADMIN ✦ FASTER FOLLOW-UP ✦ CLEAR SCOPES ✦ DIRECT DEVELOPER ACCESS ✦</span>
+          <span aria-hidden="true">MORE ENQUIRIES ✦ LESS ADMIN ✦ FASTER FOLLOW-UP ✦ CLEAR SCOPES ✦ DIRECT DEVELOPER ACCESS ✦</span>
         </div>
       </div>
 
-      <section className="services section" id="services">
-        <div className="intro"><small>WHAT WE BUILD</small><h2>Useful software.<br /><em>Nothing you don’t need.</em></h2><p>No bloated platforms or vague tech talk. Just the right solution for the problem slowing your business down.</p></div>
-        <div className="serviceList">{services.map(([n, t, p]) => <article key={n}><span>{n}</span><div><h3>{t}</h3><p>{p}</p></div><b>↗</b></article>)}</div>
+      <section className="problems section" id="problems">
+        <div className="intro"><small>PROBLEMS WE SOLVE</small><h2>Where time and money <em>leak out.</em></h2><p>You do not need to know the technical answer first. Start with the part of the business that is slow, repetitive or losing opportunities.</p></div>
+        <div className="problemGrid">
+          {problems.map(([title, copy], index) => <article key={title}><span>0{index + 1}</span><h3>{title}</h3><p>{copy}</p></article>)}
+        </div>
       </section>
 
-      <section className="packages section" id="packages">
-        <div className="intro packageIntro"><h2>Simple packages.<br /><em>Clear expectations.</em></h2><p>Final pricing is confirmed before work begins.</p></div>
-        <div className="packageGrid">
-          {packages.map((item, index) => (
-            <article key={item.name}>
-              <div className="packageTop"><span>0{index + 1}</span><small>{item.type}</small></div>
-              <h3>{item.name}</h3>
-              <p>{item.copy}</p>
-              <ul>{item.items.map((point) => <li key={point}>{point}</li>)}</ul>
-            </article>
+      <section className="services section" id="services">
+        <div className="intro"><small>WHAT WE BUILD</small><h2>Choose the <em>result.</em><br />We’ll work out the software.</h2><p>The goal is not to add more technology. It is to remove friction and create a clearer path to revenue or time saved.</p></div>
+        <div className="serviceList">
+          {services.map((service) => (
+            <a href={service.href} key={service.number}>
+              <span>{service.number}</span>
+              <div><h3>{service.title}</h3><p>{service.copy}</p><small>{service.cta} →</small></div>
+              <b>↗</b>
+            </a>
           ))}
         </div>
       </section>
 
-      <section className="statement">
-        <div><small>BUILT FOR THE REAL WORLD</small><h2>Software should fit your business.<br /><em>Not the other way around.</em></h2></div>
-        <p>You know your business. We know how to turn the frustrating, manual parts into something faster, simpler and easier to grow.</p>
+      <section className="demo section" id="demo">
+        <div className="demoVisual" aria-hidden="true">
+          <div className="demoBadge">CONCEPT DEMO</div>
+          <div className="demoFlow">
+            <div><span>01</span><strong>Missed call</strong><small>Patient cannot get through</small></div>
+            <i>→</i>
+            <div><span>02</span><strong>SMS sent</strong><small>Follow-up happens automatically</small></div>
+            <i>→</i>
+            <div><span>03</span><strong>Booking path</strong><small>Conversation continues</small></div>
+          </div>
+        </div>
+        <div className="intro demoCopy"><small>SEE IT WORKING</small><h2>Understand the automation in <em>40 seconds.</em></h2><p>This concept was prepared for Gentle Dental Care to show how a missed call can trigger an immediate SMS follow-up and give the patient an easier path back toward booking.</p><p className="disclosure">Concept demonstration only — not presented as a customer case study.</p><a className="primary" href="/demo/gentle-dental-care">Watch the demo <span>↗</span></a></div>
+      </section>
+
+      <section className="why section" id="why">
+        <div className="intro"><small>WHY SYED SOFTWARE</small><h2>Built without the usual <em>software headaches.</em></h2></div>
+        <div className="whyGrid">
+          <article><h3>Clear scope first</h3><p>You know what is being built and what is not before the work starts.</p></article>
+          <article><h3>Direct communication</h3><p>You speak directly with the person responsible for building the solution.</p></article>
+          <article><h3>Built around your workflow</h3><p>The software should adapt to the business — not force the business to adapt to it.</p></article>
+          <article><h3>Clear handover</h3><p>You know what you are receiving, how it works and what support is included at launch.</p></article>
+        </div>
+      </section>
+
+      <section className="packages section" id="packages">
+        <div className="intro packageIntro"><h2>Simple packages.<br /><em>Clear expectations.</em></h2><p>Indicative ranges help you judge fit before a call. Final pricing is confirmed before work begins.</p></div>
+        <div className="packageGrid">
+          {packages.map((item, index) => (
+            <article key={item.name} id={item.id}>
+              <div className="packageTop"><span>0{index + 1}</span><small>{item.type}</small></div>
+              <h3>{item.name}</h3>
+              <strong className="packageOutcome">{item.outcome}</strong>
+              <div className="packagePrice"><small>TYPICAL RANGE</small><b>{item.price}</b>{item.subprice && <span>{item.subprice}</span>}</div>
+              <p>{item.copy}</p>
+              <ul>{item.items.map((point) => <li key={point}>{point}</li>)}</ul>
+              <a href="#quote">Get my scope &amp; price →</a>
+            </article>
+          ))}
+        </div>
+        <p className="pricingFootnote">Ranges are indicative and depend on integrations, workflow complexity and scope. Final pricing is confirmed before work begins.</p>
+      </section>
+
+      <section className="midCta">
+        <div><small>HAVE A SPECIFIC PROBLEM?</small><h2>Tell us what is costing you <em>time or opportunities.</em></h2></div>
+        <a className="primary" href="#quote">Show me the best approach <span>↗</span></a>
+      </section>
+
+      <section className="faq section" id="faq">
+        <div className="intro"><small>BEFORE YOU ENQUIRE</small><h2>Common questions,<br /><em>answered clearly.</em></h2></div>
+        <div className="faqList">
+          {faqs.map(([question, answer]) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}
+        </div>
       </section>
 
       <section className="quote" id="quote">
-        <div><small>START A PROJECT</small><h2>What could work <em>better</em> in your business?</h2><p>Tell us what you’re trying to improve. We’ll reply with practical next steps—not a hard sell.</p><div className="reply">↳ <b>Typically replies within 1 business day</b></div></div>
+        <div>
+          <small>START A PROJECT</small>
+          <h2>What is costing your business <em>time or money?</em></h2>
+          <p>Describe the problem in plain English. We’ll reply with a practical next step — not a hard sell.</p>
+          <div className="nextSteps"><strong>What happens next</strong><ol><li>You send the problem.</li><li>We review it and recommend the simplest useful approach.</li><li>You receive an indicative scope.</li><li>Nothing starts until you approve the final price.</li></ol></div>
+          <div className="reply">↳ <b>Typically replies within 1 business day</b></div>
+        </div>
         <form onSubmit={quote}>
-          <div className="row"><label>Your name<input name="name" placeholder="e.g. Sarah Nguyen" required /></label><label>Business name<input name="business" placeholder="Your business" required /></label></div>
+          <label>Your name<input name="name" placeholder="e.g. Sarah Nguyen" required /></label>
           <label>Email address<input name="email" type="email" placeholder="you@business.com" required /></label>
-          <label>What do you need?<select name="project" defaultValue="" required><option value="" disabled>Select a project type</option><option>Business website</option><option>Automation</option><option>Custom software</option><option>Not sure yet</option></select></label>
-          <label>Tell us about the project<textarea name="details" rows={4} placeholder="What problem are you trying to solve?" required /></label>
-          <button disabled={formState === "sending"}>{formState === "sending" ? "Sending…" : "Request my quote"} <span>↗</span></button>
+          <label>What are you trying to improve?<textarea name="details" rows={6} placeholder="e.g. We miss calls while staff are busy and want customers followed up automatically…" required /></label>
+          <button disabled={formState === "sending"}>{formState === "sending" ? "Sending…" : "Get my scope & price"} <span>↗</span></button>
+          <p className="formReassurance">No obligation. We only need enough detail to understand the problem.</p>
           {formMessage && <p className={`note ${formState === "error" ? "error" : ""}`} role="status">{formMessage}</p>}
         </form>
       </section>

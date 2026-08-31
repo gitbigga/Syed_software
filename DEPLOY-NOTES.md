@@ -1,33 +1,31 @@
-# Syed Software update
+# Syed Software conversion update
 
-Files in this patch are intended to replace/add files in `gitbigga/Syed_software`.
+This patch is intended to replace/add files in `gitbigga/Syed_software`.
 
-## Main-site changes
-- `app/page.tsx`: viewport-triggered process carousel, moving services ticker, packaged offers, async quote form.
-- `app/globals.css`: carousel/ticker/package styling and mobile/reduced-motion support.
-- `app/api/quote/route.ts`: sends quote enquiries through Resend.
+## Main conversion changes
+- Sticky top navigation with only brand + `Get a scope & price` CTA.
+- Removed the old `SOFTWARE FOR LOCAL BUSINESS` eyebrow.
+- Hero rewritten around customer outcomes: more customers, less admin, more time back.
+- Process carousel timer now uses a resettable timeout, so manual navigation and the visual progress bar stay synchronized.
+- Benefits-focused ticker replaces the old list of software categories.
+- New `Problems we solve` section.
+- `What we build` reframed around outcomes and each card now links somewhere useful.
+- Added a GDC concept-demo block that links to `/demo/gentle-dental-care` and clearly labels it as a concept, not a customer case study.
+- Added trust/risk-reversal section.
+- Packages renamed around outcomes and given indicative AUD price ranges.
+- `Automation 100` renamed to `Lead Follow-Up System`.
+- Added a mid-page CTA and FAQ section.
+- Quote form reduced to name, email and plain-English problem description.
+- Quote API now treats business/project as optional.
 
-## Reusable prospect demo system
-- `lib/demo-clients.ts`: one configuration object per prospect.
-- `app/demo/[slug]/page.tsx`: reusable client landing page.
-- `app/demo/[slug]/page.module.css`: client-theme-driven page styles.
-- `public/clients/gentle-dental-care/logo.png`
-- `public/clients/gentle-dental-care/demo.mp4`
+## Indicative ranges currently shown
+- Business Website: AUD $1,500–$4,000
+- Lead Follow-Up System: AUD $1,000–$3,000 setup; typical ongoing $150–$500/month
+- Business Workflow System: AUD $3,000–$10,000+
 
-First page slug: `/demo/gentle-dental-care`
+These are intentionally labeled indicative and can be edited before the next production deployment.
 
-## Required Vercel environment variables for the quote form
-- `RESEND_API_KEY` — Resend API key.
-- `QUOTE_TO_EMAIL` — inbox that should receive new quote requests.
-- `RESEND_FROM_EMAIL` — recommended after verifying a sending domain in Resend, e.g. `Syed Software <quotes@yourdomain.com>`.
-
-If `RESEND_FROM_EMAIL` is absent, the API route falls back to `Syed Software <onboarding@resend.dev>`, which is suitable only for Resend testing constraints.
-
-## Prospect page usage conditions currently shown
-- Up to 100 automated SMS/call actions per monthly billing period.
-- Included actions do not roll over.
-- Additional usage can be sold as packaged add-on blocks.
-- Pricing is presented as a defined range and fixed after scope confirmation; no exact public price is hard-coded.
-
-## Validation performed
-The TypeScript/TSX files were syntax-checked using the TypeScript compiler API. A full `next build` still needs the repository dependencies/environment.
+## Required Vercel environment variables
+- `RESEND_API_KEY`
+- `QUOTE_TO_EMAIL`
+- `RESEND_FROM_EMAIL` (recommended after verifying your sending domain)

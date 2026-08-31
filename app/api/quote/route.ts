@@ -23,11 +23,8 @@ export async function POST(request: Request) {
   const project = clean(body.project, 120);
   const details = clean(body.details, 5000);
 
-  if (!name || !business || !EMAIL_PATTERN.test(email) || !project || !details) {
-    return NextResponse.json(
-      { error: "Please complete all fields with a valid email address." },
-      { status: 400 },
-    );
+  if (!name || !EMAIL_PATTERN.test(email) || !details) {
+    return NextResponse.json({ error: "Please enter your name, a valid email address and a short description of the problem." }, { status: 400 });
   }
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -36,21 +33,18 @@ export async function POST(request: Request) {
 
   if (!apiKey || !toEmail) {
     console.error("Quote form is missing RESEND_API_KEY or QUOTE_TO_EMAIL.");
-    return NextResponse.json(
-      { error: "The quote form is temporarily unavailable. Please try again shortly." },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "The quote form is temporarily unavailable. Please try again shortly." }, { status: 500 });
   }
 
   const text = [
-    "New quote request from the Syed Software website",
+    "New enquiry from the Syed Software website",
     "",
     `Name: ${name}`,
-    `Business: ${business}`,
+    `Business: ${business || "Not provided"}`,
     `Email: ${email}`,
-    `Project: ${project}`,
+    `Project: ${project || "Not specified"}`,
     "",
-    "Project details:",
+    "What they want to improve:",
     details,
   ].join("\n");
 
@@ -64,7 +58,7 @@ export async function POST(request: Request) {
       from: fromEmail,
       to: [toEmail],
       reply_to: email,
-      subject: `Quote request from ${name} — ${business}`,
+      subject: `New website enquiry from ${name}`,
       text,
     }),
   });
