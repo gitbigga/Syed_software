@@ -71,6 +71,15 @@ const packages = [
   },
 ];
 
+const tickerItems = ["MORE ENQUIRIES", "LESS ADMIN", "FASTER FOLLOW-UP", "CLEAR SCOPES", "DIRECT DEVELOPER ACCESS"];
+
+const trustedPlatforms = [
+  { name: "Twilio", category: "SMS & calls", useCase: "Missed-call follow-up, reminders and customer notifications." },
+  { name: "OpenAI", category: "AI-assisted workflows", useCase: "Classify enquiries, draft responses and summarise handoffs." },
+  { name: "Vercel", category: "Web delivery", useCase: "Fast hosting and reliable deployment for websites and web apps." },
+  { name: "Resend", category: "Email delivery", useCase: "Quote confirmations, alerts and transactional email." },
+];
+
 const faqs = [
   ["How much does a project cost?", "The package ranges above are indicative. Final pricing is confirmed before work begins, after the exact scope and integrations are clear."],
   ["Do I need to know what software I need?", "No. Start with the problem. Tell us what is taking too long, getting missed or costing opportunities, and we can recommend the simplest useful approach."],
@@ -185,16 +194,14 @@ export default function Home() {
     <main>
       <header>
         <a className="brand" href="#top"><b><i /><i /><i /></b><span>SYED<small>SOFTWARE</small></span></a>
-        <a className="navCta" href="#quote">Get a scope &amp; price ↗</a>
+        <a className="navCta" href="#quote-form">Get a scope &amp; price ↗</a>
       </header>
 
       <section className="hero" id="top">
         <div className="heroCopy">
           <h1>More sales.<br /><em>Less admin.</em><br />More time back.</h1>
           <p className="lead">Websites and automations designed to help local businesses bring in more enquiries, follow them up faster and cut repetitive work.</p>
-          <div className="actions"><a className="primary" href="#quote">Get a scope &amp; price <span>↗</span></a><a href="#problems">See what we solve ↓</a></div>
-          <p className="microcopy">No obligation. You’ll know what is involved before work begins.</p>
-          <div className="trust"><span>Built locally</span><span>Clear scope before build</span><span>Direct developer access</span></div>
+          <div className="actions"><a className="primary" href="#quote-form">Get a scope &amp; price <span>↗</span></a></div>
         </div>
 
         <div className="heroProcess" id="process">
@@ -234,8 +241,12 @@ export default function Home() {
 
       <div className="ticker" aria-label="Benefits ticker">
         <div className="tickerTrack">
-          <span>MORE ENQUIRIES ✦ LESS ADMIN ✦ FASTER FOLLOW-UP ✦ CLEAR SCOPES ✦ DIRECT DEVELOPER ACCESS ✦</span>
-          <span aria-hidden="true">MORE ENQUIRIES ✦ LESS ADMIN ✦ FASTER FOLLOW-UP ✦ CLEAR SCOPES ✦ DIRECT DEVELOPER ACCESS ✦</span>
+          <div className="tickerGroup">
+            {tickerItems.map((item) => <span className="tickerItem" key={item}>{item}<i aria-hidden="true">✦</i></span>)}
+          </div>
+          <div className="tickerGroup" aria-hidden="true">
+            {tickerItems.map((item) => <span className="tickerItem" key={`copy-${item}`}>{item}<i>✦</i></span>)}
+          </div>
         </div>
       </div>
 
@@ -273,6 +284,22 @@ export default function Home() {
         <div className="intro demoCopy"><small>SEE IT WORKING</small><h2>Understand the automation in <em>40 seconds.</em></h2><p>This concept was prepared for Gentle Dental Care to show how a missed call can trigger an immediate SMS follow-up and give the patient an easier path back toward booking.</p><p className="disclosure">Concept demonstration only — not presented as a customer case study.</p><a className="primary" href="/demo/gentle-dental-care">Watch the demo <span>↗</span></a></div>
       </section>
 
+      <section className="platforms section" id="platforms">
+        <div className="intro platformIntro">
+          <small>TRUSTED PLATFORMS</small>
+          <h2>Built with tools businesses <em>already trust.</em></h2>
+          <p>We use proven platforms for communications, AI, hosting and email, then tailor the workflow around your business.</p>
+        </div>
+        <div className="platformGrid">
+          {trustedPlatforms.map((platform) => (
+            <article key={platform.name}>
+              <div className="platformName"><strong>{platform.name}</strong><span>{platform.category}</span></div>
+              <div className="platformUse"><small>USE CASE</small><p>{platform.useCase}</p></div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="why section" id="why">
         <div className="intro"><small>WHY SYED SOFTWARE</small><h2>Built without the usual <em>software headaches.</em></h2></div>
         <div className="whyGrid">
@@ -294,7 +321,7 @@ export default function Home() {
               <div className="packagePrice"><small>TYPICAL RANGE</small><b>{item.price}</b>{item.subprice && <span>{item.subprice}</span>}</div>
               <p>{item.copy}</p>
               <ul>{item.items.map((point) => <li key={point}>{point}</li>)}</ul>
-              <a href="#quote">Get my scope &amp; price →</a>
+              <a href="#quote-form">Get my scope &amp; price →</a>
             </article>
           ))}
         </div>
@@ -303,7 +330,7 @@ export default function Home() {
 
       <section className="midCta">
         <div><small>HAVE A SPECIFIC PROBLEM?</small><h2>Tell us what is costing you <em>time or opportunities.</em></h2></div>
-        <a className="primary" href="#quote">Show me the best approach <span>↗</span></a>
+        <a className="primary" href="#quote-form">Show me the best approach <span>↗</span></a>
       </section>
 
       <section className="faq section" id="faq">
@@ -317,11 +344,10 @@ export default function Home() {
         <div>
           <small>START A PROJECT</small>
           <h2>What is costing your business <em>time or money?</em></h2>
-          <p>Describe the problem in plain English. We’ll reply with a practical next step — not a hard sell.</p>
-          <div className="nextSteps"><strong>What happens next</strong><ol><li>You send the problem.</li><li>We review it and recommend the simplest useful approach.</li><li>You receive an indicative scope.</li><li>Nothing starts until you approve the final price.</li></ol></div>
+          <p className="quoteLead">Tell us what is slowing the business down or costing you opportunities. We’ll reply with a clear recommendation and the next step.</p>
           <div className="reply">↳ <b>Typically replies within 1 business day</b></div>
         </div>
-        <form onSubmit={quote}>
+        <form id="quote-form" onSubmit={quote}>
           <label>Your name<input name="name" placeholder="e.g. Sarah Nguyen" required /></label>
           <label>Email address<input name="email" type="email" placeholder="you@business.com" required /></label>
           <label>What are you trying to improve?<textarea name="details" rows={6} placeholder="e.g. We miss calls while staff are busy and want customers followed up automatically…" required /></label>

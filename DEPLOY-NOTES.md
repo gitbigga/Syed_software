@@ -1,31 +1,22 @@
 # Syed Software conversion update
 
-This patch is intended to replace/add files in `gitbigga/Syed_software`.
+This patch is based on the latest conversion build and includes the current GDC demo route/assets plus the main landing-page refinements.
 
-## Main conversion changes
-- Sticky top navigation with only brand + `Get a scope & price` CTA.
-- Removed the old `SOFTWARE FOR LOCAL BUSINESS` eyebrow.
-- Hero rewritten around customer outcomes: more customers, less admin, more time back.
-- Process carousel timer now uses a resettable timeout, so manual navigation and the visual progress bar stay synchronized.
-- Benefits-focused ticker replaces the old list of software categories.
-- New `Problems we solve` section.
-- `What we build` reframed around outcomes and each card now links somewhere useful.
-- Added a GDC concept-demo block that links to `/demo/gentle-dental-care` and clearly labels it as a concept, not a customer case study.
-- Added trust/risk-reversal section.
-- Packages renamed around outcomes and given indicative AUD price ranges.
-- `Automation 100` renamed to `Lead Follow-Up System`.
-- Added a mid-page CTA and FAQ section.
-- Quote form reduced to name, email and plain-English problem description.
-- Quote API now treats business/project as optional.
+## Latest refinements
 
-## Indicative ranges currently shown
-- Business Website: AUD $1,500–$4,000
-- Lead Follow-Up System: AUD $1,000–$3,000 setup; typical ongoing $150–$500/month
-- Business Workflow System: AUD $3,000–$10,000+
+- Removed the secondary hero link, no-obligation line, and three hero trust bullets to reduce above-the-fold clutter.
+- Rebuilt the moving benefits ticker with fixed, even spacing between every phrase and separator.
+- Improved the quote-section lead copy and increased its contrast/readability.
+- Removed the “What happens next” block from the quote section.
+- Changed primary scope/price CTAs to target `#quote-form` directly instead of the top of the quote section.
+- Added a “Trusted platforms” credibility section with concrete use cases for Twilio, OpenAI, Vercel, and Resend. This wording intentionally avoids implying formal partnership or endorsement.
+- Removed the layout-shifting hover effect from the “What we build” links and replaced it with a cleaner inset accent/arrow movement.
+- Added minor typography smoothing and responsive styling for the new platform section.
 
-These are intentionally labeled indicative and can be edited before the next production deployment.
+## Quote email environment variables
 
-## Required Vercel environment variables
+Set these in Vercel for the form to send via Resend:
+
 - `RESEND_API_KEY`
 - `QUOTE_TO_EMAIL`
-- `RESEND_FROM_EMAIL` (recommended after verifying your sending domain)
+- `RESEND_FROM_EMAIL` (optional; otherwise Resend onboarding sender is used)
