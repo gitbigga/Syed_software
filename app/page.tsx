@@ -1,45 +1,18 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 const repetitiveWork = [
   "chase enquiries",
-  "update systems",
   "schedule appointments",
   "follow up customers",
-  "process information",
-  "move data between software",
 ];
 
 const automationAreas = [
-  ["Customer communication", "Respond to routine customer messages without leaving every reply to staff."],
   ["Lead follow-up", "Keep new enquiries moving when the team is busy or the first contact is missed."],
   ["Appointment workflows", "Automate reminders, confirmations and simple booking handoffs."],
+  ["Customer communication", "Respond to routine customer messages without leaving every reply to staff."],
   ["Admin automation", "Remove repetitive copying, checking, formatting and status updates."],
-  ["CRM automation", "Keep records, stages and follow-ups updated from the work already happening."],
-  ["Internal workflows", "Connect people, forms and software so work moves without manual chasing."],
-  ["Custom software", "Build the missing tool when off-the-shelf software does not fit the operation."],
-];
-
-const workflowExamples = [
-  {
-    label: "Missed enquiries",
-    problem: "A customer calls while staff are busy and nobody has time to follow up immediately.",
-    system: "Detect the missed call and trigger a business-specific SMS with a clear next step.",
-    outcome: "The enquiry is acknowledged quickly without adding another admin task.",
-  },
-  {
-    label: "Appointment admin",
-    problem: "Staff repeatedly confirm appointments, answer the same questions and chase no-responses.",
-    system: "Automate reminders, confirmations and simple routing while keeping staff in control of exceptions.",
-    outcome: "Less repetitive messaging and fewer manual follow-up steps.",
-  },
-  {
-    label: "Data handoffs",
-    problem: "Information is copied between forms, inboxes, spreadsheets and the CRM by hand.",
-    system: "Capture the information once, validate it and push it into the right system automatically.",
-    outcome: "Fewer handoff errors and less time spent moving data instead of using it.",
-  },
 ];
 
 const processSteps = [
@@ -49,18 +22,38 @@ const processSteps = [
   ["Deploy into the business", "We put it live, document the handover and make sure the team knows where automation stops and human judgement starts."],
 ];
 
-const trustedTechnology = [
-  ["Twilio", "SMS & calls", "Missed-call follow-up, reminders and customer notifications."],
-  ["OpenAI", "AI-assisted work", "Classifying enquiries, extracting information and drafting structured responses."],
-  ["Vercel", "Web systems", "Fast delivery for customer-facing pages, portals and internal web tools."],
-  ["Resend", "Email delivery", "Enquiry notifications, confirmations and transactional email."],
-  ["Airtable", "Operations & CRM", "Lead records, workflow state, handoffs and simple operational databases."],
-];
-
 export default function Home() {
-  const [activeWorkflow, setActiveWorkflow] = useState(0);
+  const [activeProcess, setActiveProcess] = useState(0);
+  const [processStarted, setProcessStarted] = useState(false);
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
+  const processRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const node = processRef.current;
+    if (!node || processStarted) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setProcessStarted(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [processStarted]);
+
+  useEffect(() => {
+    if (!processStarted || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => {
+      setActiveProcess((current) => (current + 1) % processSteps.length);
+    }, 2800);
+    return () => window.clearInterval(timer);
+  }, [processStarted]);
 
   async function submitWorkflow(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -84,7 +77,7 @@ export default function Home() {
         }),
       });
 
-      const result = await response.json().catch(() => ({}));
+      const result = (await response.json().catch(() => ({}))) as { error?: string };
       if (!response.ok) throw new Error(result.error || "We couldn’t send your enquiry.");
 
       form.reset();
@@ -96,7 +89,6 @@ export default function Home() {
     }
   }
 
-  const workflow = workflowExamples[activeWorkflow];
 
   return (
     <main>
@@ -104,7 +96,7 @@ export default function Home() {
         <a className="brand" href="#top" aria-label="Leverage Systems home">
           <img src="/brand/leverage-systems-logo.svg" alt="Leverage Systems" />
         </a>
-        <a className="headerCta" href="#workflow-form">Discuss your workflow <span>↗</span></a>
+        <a className="headerCta" href="#workflow-form">Get time back <span>↗</span></a>
       </header>
 
       <section className="hero" id="top">
@@ -144,9 +136,9 @@ export default function Home() {
         <div className="sectionLabel">THE PROBLEM</div>
         <div className="problemIntro">
           <h2>You’re paying people to repeat work software can handle.</h2>
-          <p>Most automation opportunities are not dramatic. They are the small tasks repeated every day across calls, inboxes, calendars, CRMs and spreadsheets.</p>
+          <p>The highest-value automations are usually simple, repeated tasks that pull staff away from customers and higher-value work.</p>
         </div>
-        <div className="taskGrid">
+        <div className="taskGrid compactTasks">
           {repetitiveWork.map((task) => <div key={task}><i aria-hidden="true" />{task}</div>)}
         </div>
       </section>
@@ -159,7 +151,7 @@ export default function Home() {
           </div>
           <p>Start with the task or bottleneck. We work out the simplest useful system around it.</p>
         </div>
-        <div className="automationGrid">
+        <div className="automationGrid compactAutomation">
           {automationAreas.map(([title, copy], index) => (
             <article key={title}>
               <span>0{index + 1}</span>
@@ -171,67 +163,64 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="workflowSection section" id="workflow-example">
-        <div className="sectionHead">
-          <div>
-            <span className="sectionLabel">PROBLEM → WORKING SYSTEM</span>
-            <h2>See how a bottleneck becomes a workflow.</h2>
-          </div>
-          <p>Choose a common use case. The goal is not to automate everything — only the repeatable steps that do not need human judgement.</p>
-        </div>
-
-        <div className="workflowTabs" role="tablist" aria-label="Automation examples">
-          {workflowExamples.map((item, index) => (
-            <button
-              key={item.label}
-              type="button"
-              role="tab"
-              aria-selected={activeWorkflow === index}
-              className={activeWorkflow === index ? "active" : ""}
-              onClick={() => setActiveWorkflow(index)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="workflowMap" role="tabpanel" aria-live="polite">
-          <article>
-            <small>01 / BOTTLENECK</small>
-            <h3>The problem</h3>
-            <p>{workflow.problem}</p>
-          </article>
-          <div className="workflowArrow">→</div>
-          <article className="workflowCore">
-            <small>02 / LEVERAGE SYSTEM</small>
-            <h3>The automation</h3>
-            <p>{workflow.system}</p>
-          </article>
-          <div className="workflowArrow">→</div>
-          <article>
-            <small>03 / RESULT</small>
-            <h3>The outcome</h3>
-            <p>{workflow.outcome}</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="processSection section" id="process">
-        <div className="sectionHead">
+      <section className="processSection section" id="process" ref={processRef}>
+        <div className="sectionHead processIntro">
           <div>
             <span className="sectionLabel">HOW IT WORKS</span>
             <h2>From bottleneck to working system.</h2>
           </div>
-          <p>A clear four-step build process keeps the project focused on the business problem rather than unnecessary software.</p>
+          <p>A focused four-step process keeps the build centred on the business problem instead of unnecessary software.</p>
         </div>
-        <div className="processGrid">
-          {processSteps.map(([title, copy], index) => (
-            <article key={title}>
-              <span>0{index + 1}</span>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </article>
-          ))}
+
+        <div className="processCarousel" aria-roledescription="carousel" aria-label="Leverage Systems process">
+          <div className="processMeta">
+            <span>PROCESS</span>
+            <b>0{activeProcess + 1} / 04</b>
+          </div>
+          <div className="processViewport">
+            <div className="processTrack" style={{ transform: `translateX(-${activeProcess * 100}%)` }}>
+              {processSteps.map(([title, copy], index) => (
+                <article className="processSlide" key={title} aria-hidden={activeProcess !== index}>
+                  <span>0{index + 1}</span>
+                  <div>
+                    <h3>{title}</h3>
+                    <p>{copy}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+          <div className="processNavigation" aria-label="Process navigation">
+            <button
+              className="processArrow"
+              type="button"
+              aria-label="Previous process step"
+              onClick={() => setActiveProcess((activeProcess - 1 + processSteps.length) % processSteps.length)}
+            >
+              ◀
+            </button>
+            <div className="processControls" aria-label="Process slides">
+              {processSteps.map(([title], index) => (
+                <button
+                  type="button"
+                  key={title}
+                  className={activeProcess === index ? "active" : ""}
+                  aria-label={`Show ${title} step`}
+                  onClick={() => setActiveProcess(index)}
+                >
+                  <span />
+                </button>
+              ))}
+            </div>
+            <button
+              className="processArrow"
+              type="button"
+              aria-label="Next process step"
+              onClick={() => setActiveProcess((activeProcess + 1) % processSteps.length)}
+            >
+              ▶
+            </button>
+          </div>
         </div>
       </section>
 
@@ -267,24 +256,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="technologySection section">
-        <div className="sectionHead">
-          <div>
-            <span className="sectionLabel">TRUSTED TECHNOLOGY</span>
-            <h2>Built on proven platforms.</h2>
-          </div>
-          <p>These are technology platforms we build with, not claims of formal partnership or endorsement.</p>
-        </div>
-        <div className="technologyGrid">
-          {trustedTechnology.map(([name, category, useCase]) => (
-            <article key={name}>
-              <div><strong>{name}</strong><span>{category}</span></div>
-              <p>{useCase}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="ctaBand">
         <div>
           <span className="sectionLabel">FOUND A BOTTLENECK?</span>
@@ -298,11 +269,6 @@ export default function Home() {
           <span className="sectionLabel">DISCUSS YOUR WORKFLOW</span>
           <h2>What takes too much time in your business?</h2>
           <p>Describe the repetitive task, handoff or follow-up that keeps pulling people away from more valuable work. We’ll review it and tell you whether there is a practical automation opportunity.</p>
-          <div className="contactDetails">
-            <span>Leverage Systems</span>
-            <span>Australia</span>
-            <a href="mailto:hello@leveragesystems.tech">hello@leveragesystems.tech</a>
-          </div>
         </div>
 
         <form id="workflow-form" onSubmit={submitWorkflow}>
@@ -331,11 +297,23 @@ export default function Home() {
           <img src="/brand/leverage-systems-logo.svg" alt="Leverage Systems" />
           <p>Business automation systems built around real operational bottlenecks.</p>
         </div>
-        <div className="footerLinks">
-          <a href="/privacy">Privacy</a>
-          <a href="mailto:hello@leveragesystems.tech">Contact</a>
-          <a href="#top">Back to top ↑</a>
+
+        <div className="footerIndex">
+          <div>
+            <span className="footerHeading">PAGE INDEX</span>
+            <a href="#top">Home</a>
+            <a href="#automate">What we build</a>
+            <a href="#process">How it works</a>
+            <a href="#proof">Proof &amp; demos</a>
+            <a href="#workflow-form">Discuss your workflow</a>
+            <a href="/privacy">Privacy</a>
+          </div>
+          <div>
+            <span className="footerHeading">CONTACT</span>
+            <a href="mailto:hello@leveragesystems.tech">hello@leveragesystems.tech</a>
+          </div>
         </div>
+
         <p className="copyright">© {new Date().getFullYear()} Leverage Systems. Australia.</p>
       </footer>
     </main>
