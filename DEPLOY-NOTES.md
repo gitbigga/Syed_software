@@ -1,22 +1,94 @@
-# Syed Software conversion update
+# Leverage Systems rebrand + outbound landing-page update
 
-This patch is based on the latest conversion build and includes the current GDC demo route/assets plus the main landing-page refinements.
+This patch is designed to be applied over the current `gitbigga/Syed_software` repository.
 
-## Latest refinements
+## What changed
 
-- Removed the secondary hero link, no-obligation line, and three hero trust bullets to reduce above-the-fold clutter.
-- Rebuilt the moving benefits ticker with fixed, even spacing between every phrase and separator.
-- Improved the quote-section lead copy and increased its contrast/readability.
-- Removed the “What happens next” block from the quote section.
-- Changed primary scope/price CTAs to target `#quote-form` directly instead of the top of the quote section.
-- Added a “Trusted platforms” credibility section with concrete use cases for Twilio, OpenAI, Vercel, and Resend. This wording intentionally avoids implying formal partnership or endorsement.
-- Removed the layout-shifting hover effect from the “What we build” links and replaced it with a cleaner inset accent/arrow movement.
-- Added minor typography smoothing and responsive styling for the new platform section.
+- Complete public rebrand from **Syed Software** to **Leverage Systems**.
+- New Leverage Systems logo asset and matching dark-navy / lime visual system.
+- Browser title, metadata, Open Graph preview, social card, favicon, manifest, footer and form copy updated.
+- Homepage rewritten for cold/outbound prospects:
+  - automation-first hero;
+  - repetitive-work problem section;
+  - clear automation categories;
+  - interactive Problem → Working System use cases;
+  - four-step delivery process;
+  - capability demos and clearly labelled GDC concept;
+  - trusted technology + concrete use cases;
+  - lower-friction **Discuss your workflow** CTA.
+- Pricing/package section removed from the homepage so qualification happens before pricing.
+- Form now asks only:
+  - name;
+  - business;
+  - email;
+  - phone (optional);
+  - what takes too much time.
+- Added a basic `/privacy` page.
+- GDC demo page rebranded to Leverage Systems and kept `noindex`.
 
-## Quote email environment variables
+## Form → Resend + Airtable
 
-Set these in Vercel for the form to send via Resend:
+`app/api/quote/route.ts` now sends the lead through two channels:
 
-- `RESEND_API_KEY`
-- `QUOTE_TO_EMAIL`
-- `RESEND_FROM_EMAIL` (optional; otherwise Resend onboarding sender is used)
+1. **Airtable**
+   - finds/creates the company;
+   - finds/creates the contact;
+   - sets company status to `Interested`;
+   - sets `Lead Source` to `Inbound`;
+   - sets `Outbound Paused` to `true`;
+   - clears `Next Action At`;
+   - creates an `Outreach` record with `Direction = Inbound`.
+
+2. **Resend**
+   - sends an internal enquiry notification;
+   - sends a branded acknowledgement to the prospect as a best-effort follow-up.
+
+The existing Airtable base used is:
+
+- Base: `Leverage Systems — Lead Intelligence`
+- Default base ID: `appH4B2WvCghTcroe`
+
+Two company fields were added to that base for this flow:
+
+- `Lead Source` — Outbound / Inbound
+- `Outbound Paused` — checkbox
+
+### Important crawler rule
+
+The outbound crawler/sequence runner should skip a company whenever:
+
+- `Outbound Paused = true`, **or**
+- `Lead Source = Inbound`, **or**
+- the company status is no longer `Outreach Active`.
+
+The website endpoint sets all relevant state on inbound submission, but the outbound worker must enforce the skip rule when selecting follow-ups.
+
+## Required Vercel environment variables
+
+```text
+RESEND_API_KEY=...
+QUOTE_TO_EMAIL=...
+RESEND_FROM_EMAIL=Leverage Systems <hello@leveragesystems.tech>
+AIRTABLE_PAT=...
+```
+
+Optional overrides (defaults are already in the route):
+
+```text
+AIRTABLE_BASE_ID=appH4B2WvCghTcroe
+AIRTABLE_COMPANIES_TABLE_ID=tblNKmd9wIhv9oHEs
+AIRTABLE_CONTACTS_TABLE_ID=tbliocRbhLARfbBG1
+AIRTABLE_OUTREACH_TABLE_ID=tblpEhdVAp84YPwOC
+```
+
+Before sending traffic, confirm that `hello@leveragesystems.tech` can receive mail and that the sender/domain is verified in Resend.
+
+## Domain
+
+The metadata and canonical URLs now assume:
+
+```text
+https://leveragesystems.tech
+```
+
+Attach that domain to the production Vercel project before starting volume outreach.

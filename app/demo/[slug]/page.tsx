@@ -28,9 +28,13 @@ export async function generateMetadata({ params }: DemoPageProps): Promise<Metad
   if (!client) return {};
 
   return {
-    title: `${client.company} concept | Syed Software`,
+    title: `${client.company} concept | Leverage Systems`,
     description: client.intro,
     robots: { index: false, follow: false },
+    openGraph: {
+      title: `${client.company} concept | Leverage Systems`,
+      description: client.intro,
+    },
   };
 }
 
@@ -52,9 +56,8 @@ export default async function DemoPage({ params }: DemoPageProps) {
   return (
     <main className={styles.page} style={brandStyle}>
       <header className={styles.header}>
-        <a className={styles.syedBrand} href="/" aria-label="Syed Software home">
-          <span className={styles.syedMark} aria-hidden="true"><i /><i /><i /></span>
-          <span>SYED <b>SOFTWARE</b></span>
+        <a className={styles.leverageBrand} href="/" aria-label="Leverage Systems home">
+          <img src="/brand/leverage-systems-logo.svg" alt="Leverage Systems" />
         </a>
         <span className={styles.prepared}>Prepared for {client.company}</span>
       </header>
@@ -78,7 +81,7 @@ export default async function DemoPage({ params }: DemoPageProps) {
           <span className={styles.panelLabel}>MISSED CALL</span>
           <div className={styles.signalRow}><i /> Patient calls the practice</div>
           <div className={styles.connector}>↓</div>
-          <span className={styles.panelLabel}>AUTOMATION</span>
+          <span className={styles.panelLabel}>LEVERAGE SYSTEM</span>
           <div className={styles.signalRow}><i /> Helpful SMS sent automatically</div>
           <div className={styles.connector}>↓</div>
           <span className={styles.panelLabel}>OUTCOME</span>
@@ -90,7 +93,7 @@ export default async function DemoPage({ params }: DemoPageProps) {
         <div className={styles.sectionHeading}>
           <p>THE CONCEPT</p>
           <h2>See the workflow as the patient would experience it.</h2>
-          <span>This is an illustrative demo. The final messages, timing and integration are confirmed before launch.</span>
+          <span>This is an illustrative capability demonstration. It is not presented as a completed client project or measured client result.</span>
         </div>
         <div className={styles.videoShell}>
           <video controls playsInline preload="metadata" aria-label={`${client.company} missed-call automation demo`}>
@@ -116,42 +119,17 @@ export default async function DemoPage({ params }: DemoPageProps) {
         </div>
       </section>
 
-      <section className={styles.offerSection}>
-        <div className={styles.offerCopy}>
-          <p>PACKAGED OFFER</p>
-          <h2>{client.package.title}</h2>
-          <p>{client.package.description}</p>
-          <div className={styles.rangeNote}>
-            <b>Pricing:</b> quoted as a defined range, then fixed before work begins.
-          </div>
-        </div>
-        <div className={styles.offerCard}>
-          <span className={styles.offerTag}>INCLUDED</span>
-          <ul>
-            {client.package.inclusions.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-          <div className={styles.condition}>
-            <strong>Monthly usage condition</strong>
-            <p>{client.package.usage}</p>
-          </div>
-          <div className={styles.condition}>
-            <strong>Need more volume?</strong>
-            <p>{client.package.addOn}</p>
-          </div>
-        </div>
-      </section>
-
       <section className={styles.ctaSection}>
         <p>PREPARED FOR {client.company.toUpperCase()}</p>
-        <h2>If the workflow makes sense, the next step is simply confirming how it should fit your current phone and booking process.</h2>
+        <h2>If this workflow is useful, the next step is simply confirming how it should fit your current phone and booking process.</h2>
         <div className={styles.ctaActions}>
-          <a className={styles.primaryCta} href="/#quote">Discuss this workflow <span>↗</span></a>
+          <a className={styles.primaryCta} href="/#workflow-form">Discuss this workflow <span>↗</span></a>
           <a href="#demo">Watch demo again ↑</a>
         </div>
       </section>
 
       <footer className={styles.footer}>
-        <span>Syed Software</span>
+        <span>Leverage Systems</span>
         <span>Tailored concept prepared for {client.company}</span>
       </footer>
     </main>
